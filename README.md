@@ -17,8 +17,10 @@ import "github.com/schairez/jobs-discovery"
 package main
 
 import (
-	"fmt"
-	"github.com/schairez/jobs-discovery"
+    "fmt"
+    "github.com/schairez/jobs-discovery/githubjobs"
+    "net/http"
+    "time"
 )
 
 func main() {

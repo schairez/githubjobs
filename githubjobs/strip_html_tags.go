@@ -1,4 +1,4 @@
-package positions
+package githubjobs
 
 import (
 	"github.com/microcosm-cc/bluemonday"

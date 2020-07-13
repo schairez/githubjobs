@@ -8,7 +8,7 @@ https://jobs.github.com/api
 Import the library with
 
 ```golang
-import "github.com/schairez/jobs-discovery"
+import "github.com/schairez/jobs-discovery/githubjobs"
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ func main() {
         "location":    "sf",
         "full_time":   "true"}
 
-    var c = &JobsClient{
+    var c = &githubjobs.JobsClient{
         Client: &http.Client{Timeout: 5 * time.Second}}
     c.SetGithubJobsURL(paramsMap)
     var jobsData []JobsListing

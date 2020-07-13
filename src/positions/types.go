@@ -24,11 +24,6 @@ type (
 		Client     *http.Client
 		JobsURLApi string
 		// Timeout          time.Time time.Second * 30
-		JSONBodyResponse []JobsListing
+		// JSONBodyResponse []JobsListing
 	}
 )
-
-//ListJobsResponse struct
-// ListJobsResponse struct {
-// 	Responses []JobsListing
-// }

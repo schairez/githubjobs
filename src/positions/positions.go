@@ -39,37 +39,6 @@ func (c *JobsClient) SetGithubJobsURL(uriParams map[string]string) {
 
 }
 
-//GetJSONResponse returns structs of the json GET REST API
-func (c *JobsClient) GetJSONResponse() []JobsListing {
-	var target []JobsListing
-	resp, err := c.Client.Get(c.JobsURLApi)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&target)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return target
-}
-
-func getJSONresponse(url string, target interface{}) error {
-	githubJobsURL := buildGithubJobsURL(map[string]string{"description": "python", "location": "sf", "full_time": "true"})
-	resp, err := http.Get(githubJobsURL)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	return json.NewDecoder(resp.Body).Decode(target)
-
-	// dataBytes, err = ioutil.ReadAll(resp.Body)
-	// var ResponseStruct ListJobsResponse
-
-}
-
 /*
 
 description — A search term, such as "ruby" or "java". This parameter is aliased to search.
@@ -81,21 +50,23 @@ full_time — If you want to limit results to full time positions set this param
 */
 
 //GET /positions.json
-// func getPositions(description, location string) {
 
-// 	githubURL := getActiveGithubJobListingsURI(description, location)
-// 	fmt.Println(githubURL)
-// 	resp, err := http.Get(githubURL)
-// 	if err != nil {
-// 		log.Fatalln(err)
-// 	}
-// 	defer resp.Body.Close()
+//GetJSONResponse returns structs of the json GET REST API
+func (c *JobsClient) GetJSONResponse() []JobsListing {
+	var target []JobsListing
+	resp, err := c.Client.Get(c.JobsURLApi)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Fatalf("response status code was %d\n", resp.StatusCode)
+	}
 
-// 	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-// 	log.Println(string(bodyBytes))
-// 	var ResponseStruct ListJobsResponse
-// 	json.Unmarshal(bodyBytes, &ResponseStruct)
-// 	ResponseJSON, _ := json.MarshalIndent(ResponseStruct, "", "\t")
-// 	err = ioutil.WriteFile("output.json", ResponseJSON, 0644)
-
-// }
+	defer resp.Body.Close()
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&target)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return target
+}

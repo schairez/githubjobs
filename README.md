@@ -1,2 +1,4 @@
 # jobs_discovery
-querying and analyzing job results from the the google jobs api
+
+Package jobs_discovery is a wrapper for the github jobs api
+https://jobs.github.com/api

@@ -8,7 +8,7 @@ https://jobs.github.com/api
 Import the library with
 
 ```golang
-import "github.com/denisbrodbeck/jobs-discovery"
+import "github.com/schairez/jobs-discovery"
 ```
 
 ## Usage

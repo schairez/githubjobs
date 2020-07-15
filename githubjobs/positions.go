@@ -2,42 +2,12 @@ package githubjobs
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 )
-
-const (
-	//BaseURLGithubPositionsAPI comment
-	BaseURLGithubPositionsAPI = "https://jobs.github.com/positions.json?"
-)
-
-func buildGithubJobsURL(uriParams map[string]string) string {
-	size := len(uriParams)
-	cnt := 0
-	urlparams := ""
-	for k, v := range uriParams {
-		urlparams += k + "=" + v
-		cnt++
-		if size != cnt {
-			urlparams += "&"
-		}
-
-	}
-	return BaseURLGithubPositionsAPI + urlparams
-
-}
-
-//SetHTTPClient sets a new http client
-func (c *JobsClient) SetHTTPClient(client *http.Client) {
-	c.Client = client
-}
-
-//SetGithubJobsURL receives a list of objs representing the params that
-// will be passed to Github Jobs REST API
-func (c *JobsClient) SetGithubJobsURL(uriParams map[string]string) {
-	c.JobsURLApi = buildGithubJobsURL(uriParams)
-
-}
 
 /*
 
@@ -49,24 +19,105 @@ full_time — If you want to limit results to full time positions set this param
 
 */
 
-//GET /positions.json
+func buildGithubJobsURLFromMap(uriParams map[string]string) string {
+	u, err := url.Parse(BaseURLGithubPositionsAPI)
+	if err != nil {
+		log.Fatal(err)
+	}
+	q := u.Query()
+	if uriParams != nil {
+		for k, v := range uriParams {
+			q.Set(k, v)
+		}
+		u.RawQuery = q.Encode()
+	}
+	return u.String()
+}
 
-//GetJSONResponse returns structs of the json GET REST API
-func (c *JobsClient) GetJSONResponse() []JobsListing {
-	var target []JobsListing
+func buildGithubJobsURLFromStruct(params *OptParams) string {
+
+	u, err := url.Parse(BaseURLGithubPositionsAPI)
+	if err != nil {
+		log.Fatal(err)
+	}
+	q := u.Query()
+	if params != nil {
+		if params.Description != nil {
+			q.Add("description", *params.Description)
+		}
+		if params.Location != nil {
+			q.Add("location", *params.Location)
+		}
+		if params.FullTime != nil {
+			q.Set("full_time", *params.FullTime)
+		}
+		if params.FullTime != nil {
+			q.Set("full_time", *params.FullTime)
+
+		}
+		if params.Lat != nil {
+			q.Set("lat", *params.Lat)
+
+		}
+		if params.Long != nil {
+			q.Set("long", *params.Long)
+
+		}
+
+		u.RawQuery = q.Encode()
+	}
+	return u.String()
+
+}
+
+//SetGithubJobsURLFromMap receives a list of objs representing the params that
+// will be passed to Github Jobs REST API
+func (c *JobsClient) SetGithubJobsURLFromMap(uriParams map[string]string) {
+	c.JobsURLApi = buildGithubJobsURLFromMap(uriParams)
+
+}
+
+//SetGithubJobsURLFromStruct receives a list of objs representing the params that
+// will be passed to Github Jobs REST API
+func (c *JobsClient) SetGithubJobsURLFromStruct(params *OptParams) {
+	c.JobsURLApi = buildGithubJobsURLFromStruct(params)
+
+}
+
+//SetHTTPClient sets a new http client
+func (c *JobsClient) SetHTTPClient(client *http.Client) {
+	c.Client = client
+}
+
+/*
+GetPositionsResultStruct sends a GET request to the Github Jobs API and returns the json response as a ArrOfJobListingStructs
+GET /positions.json
+*/
+func (c *JobsClient) GetPositionsResultStruct() (*ArrOfJobListingStructs, error) {
+	target := &ArrOfJobListingStructs{}
 	resp, err := c.Client.Get(c.JobsURLApi)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("response status code was %d\n", resp.StatusCode)
+	//a non-2xxx response doesn't cause an error w/ http client
+	statusOK := resp.StatusCode >= 200 && resp.StatusCode < 300
+	if !statusOK {
+		return nil, fmt.Errorf("non-2xxx response: %v", resp.StatusCode)
 	}
 
 	defer resp.Body.Close()
+
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&target)
+	//err decoding json stream
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-	return target
+
+	if len(*target) == 0 {
+		return nil, errors.New("Empty structure b/c no results found for your query entry")
+
+	}
+
+	return target, nil
 }

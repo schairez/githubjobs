@@ -1,7 +1,7 @@
 # jobs_discovery
 
 Package jobs_discovery is a wrapper for the github jobs api
-https://jobs.github.com/api
+More info on github jobs api: https://jobs.github.com/api
 
 ## Installation
 
@@ -34,7 +34,7 @@ func main() {
         Client: &http.Client{Timeout: 5 * time.Second}}
     c.SetGithubJobsURL(paramsMap)
     var jobsData []JobsListing
-    jobsData = c.GetJSONResponse()
+    jobsData = c.GetPositionsResultStruct()
     fmt.Println(jobsData[0].Description)
     fmt.Println(stripHTML(jobsData[0].Description))
 

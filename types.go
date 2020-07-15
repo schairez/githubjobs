@@ -10,8 +10,8 @@ const (
 )
 
 type (
-	//JobsClient is a Github Jobs REST API Client
-	JobsClient struct {
+	//Client is a Github Jobs REST API Client
+	Client struct {
 		Client     *http.Client
 		JobsURLApi string
 	}

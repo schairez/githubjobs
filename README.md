@@ -1,6 +1,6 @@
-# jobs_discovery
+# githubjobs
 
-Package jobs_discovery is a wrapper for the github jobs api
+Package githubjobs is a wrapper for the github jobs api
 More info on github jobs api: https://jobs.github.com/api
 
 ## Installation
@@ -8,7 +8,7 @@ More info on github jobs api: https://jobs.github.com/api
 Import the library with
 
 ```golang
-import "github.com/schairez/jobs-discovery/githubjobs"
+import "github.com/schairez/githubjobs"
 ```
 
 ## Usage
@@ -18,7 +18,7 @@ package main
 
 import (
     "fmt"
-    "github.com/schairez/jobs-discovery/githubjobs"
+    "github.com/schairez/githubjobs"
     "net/http"
     "time"
 )
@@ -30,11 +30,13 @@ func main() {
         "location":    "sf",
         "full_time":   "true"}
 
-    var c = &githubjobs.JobsClient{
-        Client: &http.Client{Timeout: 5 * time.Second}}
+    c := NewClient()
     c.SetGithubJobsURL(paramsMap)
-    var jobsData []JobsListing
-    jobsData = c.GetPositionsResultStruct()
+    jobsData,err := c.GetPositionsResultStruct()
+    if err != nil {
+        panic(err)
+
+    }
     fmt.Println(jobsData[0].Description)
     fmt.Println(stripHTML(jobsData[0].Description))
 

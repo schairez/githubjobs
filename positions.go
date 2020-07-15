@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 /*
@@ -70,22 +71,31 @@ func buildGithubJobsURLFromStruct(params *OptParams) string {
 
 }
 
+//NewClient sets up a new http Client for the Github Jobs API
+func NewClient() *Client {
+	return &Client{
+		Client: &http.Client{
+			Timeout: time.Minute,
+		},
+	}
+}
+
 //SetGithubJobsURLFromMap receives a list of objs representing the params that
 // will be passed to Github Jobs REST API
-func (c *JobsClient) SetGithubJobsURLFromMap(uriParams map[string]string) {
+func (c *Client) SetGithubJobsURLFromMap(uriParams map[string]string) {
 	c.JobsURLApi = buildGithubJobsURLFromMap(uriParams)
 
 }
 
 //SetGithubJobsURLFromStruct receives a list of objs representing the params that
 // will be passed to Github Jobs REST API
-func (c *JobsClient) SetGithubJobsURLFromStruct(params *OptParams) {
+func (c *Client) SetGithubJobsURLFromStruct(params *OptParams) {
 	c.JobsURLApi = buildGithubJobsURLFromStruct(params)
 
 }
 
 //SetHTTPClient sets a new http client
-func (c *JobsClient) SetHTTPClient(client *http.Client) {
+func (c *Client) SetHTTPClient(client *http.Client) {
 	c.Client = client
 }
 
@@ -93,24 +103,21 @@ func (c *JobsClient) SetHTTPClient(client *http.Client) {
 GetPositionsResultStruct sends a GET request to the Github Jobs API and returns the json response as a ArrOfJobListingStructs
 GET /positions.json
 */
-func (c *JobsClient) GetPositionsResultStruct() (*ArrOfJobListingStructs, error) {
+func (c *Client) GetPositionsResultStruct() (*ArrOfJobListingStructs, error) {
 	target := &ArrOfJobListingStructs{}
 	resp, err := c.Client.Get(c.JobsURLApi)
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 	//a non-2xxx response doesn't cause an error w/ http client
 	statusOK := resp.StatusCode >= 200 && resp.StatusCode < 300
 	if !statusOK {
-		return nil, fmt.Errorf("non-2xxx response: %v", resp.StatusCode)
+		return nil, fmt.Errorf("non-2xxx with status_code=%v", resp.StatusCode)
 	}
 
-	defer resp.Body.Close()
-
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&target)
-	//err decoding json stream
-	if err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&target); err != nil {
 		return nil, err
 	}
 

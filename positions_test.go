@@ -1,9 +1,7 @@
 package githubjobs
 
 import (
-	"net/http"
 	"testing"
-	"time"
 )
 
 func TestBuildGithubJobsURLFromMap(t *testing.T) {
@@ -29,60 +27,6 @@ func TestBuildGithubJobsURLFromStruct(t *testing.T) {
 
 }
 
-//below test ensures fn fails safely when no return from API
-func TestBuildQueryFromMap_EmptyAPIResultError(t *testing.T) {
-	paramsMap := map[string]string{
-		"description": "restroom attendant",
-		"location":    "jupyter",
-		"full_time":   "true"}
-
-	var c = &JobsClient{
-		Client: &http.Client{Timeout: 5 * time.Second}}
-	c.SetGithubJobsURLFromMap(paramsMap)
-	jobsData, err := c.GetPositionsResultStruct()
-	if err == nil {
-		t.Errorf("Expected error for empty API request, jobsData=%v", jobsData)
-	}
-	if err != nil {
-		t.Log(err)
-
-	}
-
-}
-
-// func TestBuildQuery(t *testing.T) {
-// 	req, err := http.NewRequest("GET", BaseURLGithubPositionsAPI, nil)
-// 	if err != nil {
-// 		log.Print(err)
-// 		os.Exit(1)
-// 	}
-// 	q := url.Values{}
-// 	paramsMap := map[string]string{"description": "python is great", "location": "sf", "full_time": "true"}
-// 	for k, v := range paramsMap {
-// 		q.Add(k, v)
-// 	}
-
-// 	t.Log(q)
-// 	req.URL.RawQuery = q.Encode()
-
-// 	t.Log(req.URL.String())
-// 	var c = &JobsClient{
-// 		Client: &http.Client{Timeout: 5 * time.Second}}
-// 	resp, err := c.Client.Do(req)
-// 	if err != nil {
-// 		log.Print(err)
-// 	}
-// 	defer resp.Body.Close()
-// 	var target []JobsListing
-// 	decoder := json.NewDecoder(resp.Body)
-// 	err = decoder.Decode(&target)
-// 	if err != nil {
-// 		log.Fatalln(err)
-// 	}
-// 	// t.Log(target)
-
-// }
-
 // func TestGetJSONresponse(t *testing.T) {
 
 // 	paramsMap := map[string]string{
@@ -90,15 +34,13 @@ func TestBuildQueryFromMap_EmptyAPIResultError(t *testing.T) {
 // 		"location":    "sf",
 // 		"full_time":   "true"}
 
-// 	var c = &JobsClient{
-// 		Client: &http.Client{Timeout: 5 * time.Second}}
-// 	c.SetGithubJobsURL(paramsMap)
-// 	var jobsData []JobsListing
-// 	jobsData = c.GetJSONResponse()
+// 	c := NewClient()
+// 	c.SetGithubJobsURLFromMap(paramsMap)
+// 	jobsData, err := c.GetPositionsResultStruct()
+// 	if err != nil {
+// 		t.Log(err)
+// 	}
 // 	// t.Log(jobsData)
-// 	t.Log(jobsData[0].Description)
-// 	t.Log(stripHTML(jobsData[0].Description))
-// 	// t.Log(c.GetJSONResponse())
 
 // }
 

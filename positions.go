@@ -10,6 +10,65 @@ import (
 	"time"
 )
 
+//NewClient sets up a new http Client for the Github Jobs API
+func NewClient() *Client {
+	return &Client{
+		Client: &http.Client{
+			Timeout: time.Minute,
+		},
+	}
+}
+
+//SetHTTPClient sets a new http client
+func (c *Client) SetHTTPClient(client *http.Client) {
+	c.Client = client
+}
+
+/*SetGithubJobsURLFromMap receives a map of k,v string pairs representing the params that  will be passed to Github Jobs REST API
+ */
+func (c *Client) SetGithubJobsURLFromMap(uriParams map[string]string) {
+	c.JobsURLApi = buildGithubJobsURLFromMap(uriParams)
+
+}
+
+/*SetGithubJobsURLFromStruct receives OptParams struct representing
+the params that will be passed to Github Jobs REST API
+*/
+func (c *Client) SetGithubJobsURLFromStruct(params *OptParams) {
+	c.JobsURLApi = buildGithubJobsURLFromStruct(params)
+
+}
+
+/*
+GetPositionsResultStruct sends a GET request to the Github Jobs API and returns the json response as a ArrOfJobListingStructs
+GET /positions.json
+*/
+func (c *Client) GetPositionsResultStruct() (*ArrOfJobListingStructs, error) {
+	target := &ArrOfJobListingStructs{}
+	resp, err := c.Client.Get(c.JobsURLApi)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	//a non-2xxx response doesn't cause an error w/ http client
+	statusOK := resp.StatusCode >= 200 && resp.StatusCode < 300
+	if !statusOK {
+		return nil, fmt.Errorf("non-2xxx with status_code=%v", resp.StatusCode)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&target); err != nil {
+		return nil, err
+	}
+
+	if len(*target) == 0 {
+		return nil, errors.New("Empty structure b/c no results found for your query entry")
+
+	}
+
+	return target, nil
+}
+
 /*
 
 description — A search term, such as "ruby" or "java". This parameter is aliased to search.
@@ -69,62 +128,4 @@ func buildGithubJobsURLFromStruct(params *OptParams) string {
 	}
 	return u.String()
 
-}
-
-//NewClient sets up a new http Client for the Github Jobs API
-func NewClient() *Client {
-	return &Client{
-		Client: &http.Client{
-			Timeout: time.Minute,
-		},
-	}
-}
-
-//SetGithubJobsURLFromMap receives a list of objs representing the params that
-// will be passed to Github Jobs REST API
-func (c *Client) SetGithubJobsURLFromMap(uriParams map[string]string) {
-	c.JobsURLApi = buildGithubJobsURLFromMap(uriParams)
-
-}
-
-//SetGithubJobsURLFromStruct receives a list of objs representing the params that
-// will be passed to Github Jobs REST API
-func (c *Client) SetGithubJobsURLFromStruct(params *OptParams) {
-	c.JobsURLApi = buildGithubJobsURLFromStruct(params)
-
-}
-
-//SetHTTPClient sets a new http client
-func (c *Client) SetHTTPClient(client *http.Client) {
-	c.Client = client
-}
-
-/*
-GetPositionsResultStruct sends a GET request to the Github Jobs API and returns the json response as a ArrOfJobListingStructs
-GET /positions.json
-*/
-func (c *Client) GetPositionsResultStruct() (*ArrOfJobListingStructs, error) {
-	target := &ArrOfJobListingStructs{}
-	resp, err := c.Client.Get(c.JobsURLApi)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	//a non-2xxx response doesn't cause an error w/ http client
-	statusOK := resp.StatusCode >= 200 && resp.StatusCode < 300
-	if !statusOK {
-		return nil, fmt.Errorf("non-2xxx with status_code=%v", resp.StatusCode)
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&target); err != nil {
-		return nil, err
-	}
-
-	if len(*target) == 0 {
-		return nil, errors.New("Empty structure b/c no results found for your query entry")
-
-	}
-
-	return target, nil
 }

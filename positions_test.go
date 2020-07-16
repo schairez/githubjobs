@@ -27,23 +27,6 @@ func TestBuildGithubJobsURLFromStruct(t *testing.T) {
 
 }
 
-// func TestGetJSONresponse(t *testing.T) {
-
-// 	paramsMap := map[string]string{
-// 		"description": "python",
-// 		"location":    "sf",
-// 		"full_time":   "true"}
-
-// 	c := NewClient()
-// 	c.SetGithubJobsURLFromMap(paramsMap)
-// 	jobsData, err := c.GetPositionsResultStruct()
-// 	if err != nil {
-// 		t.Log(err)
-// 	}
-// 	// t.Log(jobsData)
-
-// }
-
 // func TestStringHTMLSplitter(t *testing.T) {
 
 // 	var body = `
